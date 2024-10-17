@@ -1,20 +1,47 @@
-import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView, StatusBar } from 'react-native';
-import { ArrowDown, ArrowUp, Bell, ChevronRight, DollarSign, Home, PieChart, CreditCard, User } from 'lucide-react-native';
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  StyleSheet,
+  SafeAreaView,
+  StatusBar,
+} from 'react-native';
+import {
+  ArrowDown,
+  ArrowUp,
+  Bell,
+  ChevronRight,
+  DollarSign,
+  Home,
+  PieChart,
+  CreditCard,
+  User,
+} from 'lucide-react-native';
+import AddBudgetCategoryForm from '@/components/AddBudgetCategoryForm';
+
+interface BudgetCategory {
+  name: string;
+  amount: number;
+  spent: number;
+  color: string;
+}
 
 const Progress = ({ value, color = '#3b82f6' }: any) => (
   <View style={styles.progressContainer}>
-    <View style={[styles.progressBar, { width: `${value}%`, backgroundColor: color }]} />
+    <View
+      style={[
+        styles.progressBar,
+        { width: `${value}%`, backgroundColor: color },
+      ]}
+    />
   </View>
 );
 
 const Button = ({ children, variant, style, ...props }: any) => (
   <TouchableOpacity
-    style={[
-      styles.button,
-      variant === 'ghost' && styles.ghostButton,
-      style
-    ]}
+    style={[styles.button, variant === 'ghost' && styles.ghostButton, style]}
     {...props}
   >
     {children}
@@ -22,58 +49,84 @@ const Button = ({ children, variant, style, ...props }: any) => (
 );
 
 export default function BudgetScreen() {
+  const [isFormVisible, setIsFormVisible] = useState(false);
+  const [categories, setCategories] = useState<BudgetCategory[]>([
+    { name: 'Housing', amount: 1500, spent: 1200, color: '#3b82f6' },
+    { name: 'Food', amount: 600, spent: 450, color: '#22c55e' },
+    { name: 'Transportation', amount: 400, spent: 200, color: '#eab308' },
+    { name: 'Entertainment', amount: 500, spent: 300, color: '#a855f7' },
+  ]);
+
+  const handleAddCategory = (name: string, amount: number, color: string) => {
+    setCategories([...categories, { name, amount, spent: 0, color }]);
+  };
+
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle='light-content' />
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Budget</Text>
-        <Bell color="#fff" size={24} />
+        <Bell color='#fff' size={24} />
       </View>
 
       {/* Main Content */}
-      <ScrollView style={styles.content}>
-        {/* Monthly Overview */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Monthly Overview</Text>
-          <View style={styles.card}>
-            <View style={styles.overviewHeader}>
-              <Text style={styles.overviewLabel}>Total Budget</Text>
-              <Text style={styles.overviewAmount}>$4,000</Text>
-            </View>
-            <Progress value={65} />
-            <View style={styles.overviewFooter}>
-              <Text style={styles.overviewFooterText}>Spent: $2,600</Text>
-              <Text style={[styles.overviewFooterText, styles.remainingText]}>Remaining: $1,400</Text>
-            </View>
+      {/* Monthly Overview */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Monthly Overview</Text>
+        <View style={styles.card}>
+          <View style={styles.overviewHeader}>
+            <Text style={styles.overviewLabel}>Total Budget</Text>
+            <Text style={styles.overviewAmount}>$4,000</Text>
+          </View>
+          <Progress value={65} />
+          <View style={styles.overviewFooter}>
+            <Text style={styles.overviewFooterText}>Spent: $2,600</Text>
+            <Text style={[styles.overviewFooterText, styles.remainingText]}>
+              Remaining: $1,400
+            </Text>
           </View>
         </View>
+      </View>
 
-        {/* Category Breakdown */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Category Breakdown</Text>
-          {[
-            { name: "Housing", amount: 1200, total: 1500, color: "#3b82f6" },
-            { name: "Food", amount: 450, total: 600, color: "#22c55e" },
-            { name: "Transportation", amount: 200, total: 400, color: "#eab308" },
-            { name: "Entertainment", amount: 300, total: 500, color: "#a855f7" },
-          ].map((category, index) => (
-            <View key={index} style={styles.card}>
-              <View style={styles.categoryHeader}>
-                <Text style={styles.categoryName}>{category.name}</Text>
-                <Text style={styles.categoryAmount}>${category.amount} / ${category.total}</Text>
-              </View>
-              <Progress value={(category.amount / category.total) * 100} color={category.color} />
+      {/* Category Breakdown */}
+      <Text style={[styles.sectionTitle, styles.section]}>
+        Category Breakdown ({categories.length})
+      </Text>
+      <ScrollView style={styles.section}>
+        {categories.map((category, index) => (
+          <View key={index} style={styles.card}>
+            <View style={styles.categoryHeader}>
+              <Text style={styles.categoryName}>{category.name}</Text>
+              <Text style={styles.categoryAmount}>
+                ${category.spent} / ${category.amount}
+              </Text>
             </View>
-          ))}
-        </View>
-
-        {/* Quick Add Budget */}
-        <Button variant='' style={styles.addBudgetButton}>
-          <DollarSign color="#fff" size={16} />
-          <Text style={styles.addBudgetButtonText}>Add New Budget Category</Text>
-        </Button>
+            <Progress
+              value={(category.spent / category.amount) * 100}
+              color={category.color}
+            />
+          </View>
+        ))}
       </ScrollView>
+
+      {/* Quick Add Budget */}
+      <View style={styles.section}>
+        <Button
+          style={styles.addBudgetButton}
+          onPress={() => setIsFormVisible(true)}
+        >
+          <Text style={styles.addBudgetButtonText}>
+            Add Budget Category
+          </Text>
+        </Button>
+      </View>
+
+      <AddBudgetCategoryForm
+        isVisible={isFormVisible}
+        onClose={() => setIsFormVisible(false)}
+        onSubmit={handleAddCategory}
+      />
     </SafeAreaView>
   );
 }
@@ -96,12 +149,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#fff',
   },
-  content: {
-    flex: 1,
-    padding: 16,
-  },
   section: {
-    marginBottom: 24,
+    marginVertical: 10,
+    paddingHorizontal: 16,
   },
   sectionTitle: {
     fontSize: 18,

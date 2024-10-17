@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView, StatusBar } from 'react-native';
 import { Bell, Plus } from 'lucide-react-native';
+import AddTransactionForm from '@/components/AddTransactionForm';
+
 
 const ProgressBar = ({ value }:any) => (
   <View style={styles.progressBarContainer}>
@@ -15,6 +17,17 @@ const Button = ({ children, style, ...props }: any) => (
 );
 
 export default function FinanceApp() {
+  const [isFormVisible, setIsFormVisible] = useState<boolean>(false);
+  const [transactionType, setTransactionType] = useState<'income' | 'expense'>('income');
+
+  const handleAddTransaction = (type: 'income' | 'expense') => {
+    setTransactionType(type);
+    setIsFormVisible(true);
+  };
+
+  const handleSubmitTransaction = (type: 'income' | 'expense', amount: number, category: string, description: string) => {
+    console.log(`New ${type}:`, { amount, category, description });
+  };
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" />
@@ -49,15 +62,31 @@ export default function FinanceApp() {
 
         {/* Quick Actions */}
         <View style={[styles.section, styles.quickActions]}>
-          <Button style={styles.incomeButton}>
+          <Button style={styles.incomeButton} onPress={() => handleAddTransaction('income')}>
             <Plus color={'#fff'} size={16} />
             <Text style={[styles.buttonText, { color: '#fff' }]}>Income</Text>
           </Button>
-          <Button style={styles.expenseButton}>
+          <Button style={styles.expenseButton} onPress={() => handleAddTransaction('expense')}>
             <Plus color={'#fff'} size={16} />
             <Text style={styles.buttonText}>Expense</Text>
           </Button>
         </View>
+
+      {/* Add Income Transaction Form */}
+        <AddTransactionForm
+          isVisible={isFormVisible && transactionType === 'income'}
+          onClose={() => setIsFormVisible(false)}
+          onSubmit={handleSubmitTransaction}
+          transactionType={transactionType}
+        />
+
+        {/* Add Expense Transactions */}
+      <AddTransactionForm
+        isVisible={isFormVisible && transactionType === 'expense'}
+        onClose={() => setIsFormVisible(false)}
+        onSubmit={handleSubmitTransaction}
+        transactionType={transactionType}
+      />
 
         {/* Recent Transactions */}
         <View style={styles.section}>
