@@ -3,23 +3,17 @@ import {
   View,
   Text,
   ScrollView,
-  TouchableOpacity,
   StyleSheet,
   SafeAreaView,
   StatusBar,
 } from 'react-native';
 import {
-  ArrowDown,
-  ArrowUp,
   Bell,
-  ChevronRight,
-  DollarSign,
-  Home,
-  PieChart,
-  CreditCard,
-  User,
 } from 'lucide-react-native';
+import { Button } from '@/components/ui/Button';
+import { Progress } from '@/components/ui/Progress';
 import AddBudgetCategoryForm from '@/components/AddBudgetCategoryForm';
+import { Link } from '@react-navigation/native';
 
 interface BudgetCategory {
   name: string;
@@ -27,26 +21,6 @@ interface BudgetCategory {
   spent: number;
   color: string;
 }
-
-const Progress = ({ value, color = '#3b82f6' }: any) => (
-  <View style={styles.progressContainer}>
-    <View
-      style={[
-        styles.progressBar,
-        { width: `${value}%`, backgroundColor: color },
-      ]}
-    />
-  </View>
-);
-
-const Button = ({ children, variant, style, ...props }: any) => (
-  <TouchableOpacity
-    style={[styles.button, variant === 'ghost' && styles.ghostButton, style]}
-    {...props}
-  >
-    {children}
-  </TouchableOpacity>
-);
 
 export default function BudgetScreen() {
   const [isFormVisible, setIsFormVisible] = useState(false);
@@ -71,8 +45,9 @@ export default function BudgetScreen() {
       </View>
 
       {/* Main Content */}
+      <ScrollView style={styles.section}>
       {/* Monthly Overview */}
-      <View style={styles.section}>
+      {/* <View style={styles.section}> */}
         <Text style={styles.sectionTitle}>Monthly Overview</Text>
         <View style={styles.card}>
           <View style={styles.overviewHeader}>
@@ -87,14 +62,18 @@ export default function BudgetScreen() {
             </Text>
           </View>
         </View>
-      </View>
+      {/* </View> */}
 
       {/* Category Breakdown */}
       <Text style={[styles.sectionTitle, styles.section]}>
         Category Breakdown ({categories.length})
       </Text>
-      <ScrollView style={styles.section}>
         {categories.map((category, index) => (
+          <Link
+            key={index}
+            to={{ screen: 'budget_category', params: { id: category.name ?? 'sdfd' } }}
+            style={[{ textDecorationLine: 'none', marginBottom: 12, }]}
+          >
           <View key={index} style={styles.card}>
             <View style={styles.categoryHeader}>
               <Text style={styles.categoryName}>{category.name}</Text>
@@ -107,6 +86,7 @@ export default function BudgetScreen() {
               color={category.color}
             />
           </View>
+          </Link>
         ))}
       </ScrollView>
 
@@ -139,7 +119,6 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: '#3b82f6',
     padding: 16,
-    paddingTop: 32,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -160,6 +139,7 @@ const styles = StyleSheet.create({
     color: '#1f2937',
   },
   card: {
+    width: '100%',
     backgroundColor: '#fff',
     borderRadius: 8,
     padding: 16,
@@ -245,24 +225,5 @@ const styles = StyleSheet.create({
   },
   activeNavLabel: {
     color: '#3b82f6',
-  },
-  progressContainer: {
-    height: 8,
-    backgroundColor: '#e5e7eb',
-    borderRadius: 4,
-    overflow: 'hidden',
-  },
-  progressBar: {
-    height: '100%',
-    borderRadius: 4,
-  },
-  button: {
-    padding: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  ghostButton: {
-    backgroundColor: 'transparent',
   },
 });

@@ -1,6 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView, StatusBar, Image } from 'react-native';
-import { Bell, ChevronRight, CreditCard, Home, PieChart, Settings, User } from 'lucide-react-native';
+import { Bell, ChevronRight, CreditCard, Settings, User } from 'lucide-react-native';
+import ImagePickerModal from '@/components/ImagePickerModal';
+import { Button } from '@/components/ui/Button';
+import { NavigationProps } from '@/types/navigation.type';
 
 const Avatar = ({ source, fallback, size = 64 }: any) => (
   <View style={[styles.avatar, { width: size, height: size }]}>
@@ -12,20 +15,14 @@ const Avatar = ({ source, fallback, size = 64 }: any) => (
   </View>
 );
 
-const Button = ({ children, variant, style, ...props }: any) => (
-  <TouchableOpacity
-    style={[
-      styles.button,
-      variant === 'ghost' && styles.ghostButton,
-      style
-    ]}
-    {...props}
-  >
-    {children}
-  </TouchableOpacity>
-);
+export default function ProfileScreen({ navigation }: NavigationProps) {
+  const [modalVisible, setModalVisible] = useState(false);
+  const [imageUri, setImageUri] = useState<string | null>(null);
 
-export default function ProfileScreen() {
+  const handleImageSelect = (uri: string) => {
+    setImageUri(uri);
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" />
@@ -40,11 +37,28 @@ export default function ProfileScreen() {
         {/* User Info */}
         <View style={styles.userInfoCard}>
           <View style={styles.userInfo}>
-            <Avatar
-              source={{ uri: 'https://via.placeholder.com/64' }}
-              fallback="AJ"
-              size={64}
+            <TouchableOpacity style={styles.avatar} onPress={() => setModalVisible(true)}>
+            {imageUri ? (
+              <Image source={{ uri: imageUri }} style={styles.imagePreview} />
+            ) : (
+              <Avatar
+                source={{ uri: 'https://via.placeholder.com/64' }}
+                fallback="AJ"
+                size={64}
+              />
+            )}
+            </TouchableOpacity>
+
+            <ImagePickerModal
+              isVisible={modalVisible}
+              onClose={() => setModalVisible(false)}
+              onImageSelect={handleImageSelect}
+              removeImage={() => {
+                setImageUri(null)
+                setModalVisible(false)
+              }}
             />
+
             <View style={styles.userInfoText}>
               <Text style={styles.userName}>Master Anas</Text>
               <Text style={styles.userEmail}>masteranas@gmail.com</Text>
@@ -87,6 +101,17 @@ export default function ProfileScreen() {
             ))}
           </View>
         </View>
+
+        {/* logout button */}
+        <View style={[
+          styles.section,
+          styles.card,
+        ]}>
+          <Button style={{ backgroundColor: '#fff', borderRadius: 8, alignItems: 'center' }} onPress={() => navigation.push('login')}>
+            <Text style={{ fontSize: 16 }}>Logout</Text>
+          </Button>
+        </View>
+        
       </ScrollView>
     </SafeAreaView>
   );
@@ -100,7 +125,6 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: '#3b82f6',
     padding: 16,
-    paddingTop: 32,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -124,6 +148,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+  },
+  imagePreview: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
   },
   userInfo: {
     flexDirection: 'row',

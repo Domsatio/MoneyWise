@@ -8,7 +8,7 @@ import {
   Modal,
   ScrollView,
 } from "react-native";
-import { X, DollarSign, Tag, Palette } from "lucide-react-native";
+import { X, DollarSign, Tag } from "lucide-react-native";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,38 +17,16 @@ import Animated, {
   useAnimatedStyle,
   withTiming,
 } from "react-native-reanimated";
+import { budgetCategorySchema } from "@/validation/budget.validation";
+import { colorOptions } from "@/constants/Colors";
 
-const schema = z.object({
-  name: z.string().min(1, "Category name is required"),
-  amount: z
-    .string()
-    .regex(/^\d+(\.\d{1,2})?$/, "Please enter a valid number")
-    .transform((val) => parseFloat(val)),
-});
-
-type FormValues = {
-  name: string;
-  amount: string;
-};
+type FormValues = z.infer<typeof budgetCategorySchema>;
 
 interface AddBudgetCategoryFormProps {
   isVisible: boolean;
   onClose: () => void;
   onSubmit: (name: string, amount: number, color: string) => void;
 }
-
-const colorOptions = [
-  "#3b82f6",
-  "#22c55e",
-  "#eab308",
-  "#a855f7",
-  "#f43f5e",
-  "#10b981",
-  "#ef4444",
-  "#f59e0b",
-  "#6366f1",
-  "#6b7280",
-];
 
 export default function AddBudgetCategoryForm({
   isVisible,
@@ -63,25 +41,26 @@ export default function AddBudgetCategoryForm({
     reset,
     formState: { errors },
   } = useForm<FormValues>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(budgetCategorySchema),
     defaultValues: {
       name: "",
-      amount: "",
+      amount: 0,
     },
   });
 
-  const handleColorChange = (newColor: string) => {
+  const handleColorChange = (newColor: string): void => {
     color.value = newColor;
   };
 
-  const onSubmitForm = (data: FormValues) => {
+  const onSubmitForm = (data: FormValues): void => {
     const { name, amount } = data;
+    console.log("Submitting form", name, amount, color.value);
     onSubmit(name, Number(amount), color.value);
     resetForm();
     onClose();
   };
 
-  const resetForm = () => {
+  const resetForm = (): void => {
     reset();
     color.value = colorOptions[0];
   };
@@ -132,7 +111,7 @@ export default function AddBudgetCategoryForm({
                       style={styles.input}
                       placeholder="Budget Amount"
                       keyboardType="numeric"
-                      value={value}
+                      value={value.toString()}
                       onChangeText={onChange}
                     />
                   )}

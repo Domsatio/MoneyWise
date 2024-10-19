@@ -5,6 +5,7 @@ import { X, DollarSign, Tag, FileText } from 'lucide-react-native';
 import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { transactionSchema } from '@/validation/transaction.validation';
 
 type TransactionType = 'income' | 'expense';
 
@@ -15,12 +16,6 @@ interface AddTransactionFormProps {
   transactionType: TransactionType;
 }
 
-const transactionSchema = z.object({
-    amount: z.string().nonempty({ message: 'Amount is required' }).refine(value => !isNaN(parseFloat(value)), { message: 'Amount must be a valid number' }),
-    category: z.string().nonempty({ message: 'Category is required' }),
-    description: z.string().optional(),
-  });
-  
 type TransactionFormData = z.infer<typeof transactionSchema>;
 
 export default function AddTransactionForm({ isVisible, onClose, onSubmit, transactionType }: AddTransactionFormProps) {
@@ -28,14 +23,14 @@ export default function AddTransactionForm({ isVisible, onClose, onSubmit, trans
         resolver: zodResolver(transactionSchema),
       });
 
-      const handleFormSubmit = (data: TransactionFormData) => {
+      const handleFormSubmit = (data: TransactionFormData): void => {
         const { amount, category, description } = data;
         onSubmit(transactionType, parseFloat(amount), category, description || '');
         reset(); 
         onClose(); 
       };
 
-      const handleOnClose = () => { 
+      const handleOnClose = (): void => { 
         reset();
         onClose();
     };
